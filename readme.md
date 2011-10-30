@@ -52,6 +52,53 @@ on your system.
 
 This repo is maily an example.
 
+*Note: Plugins are hot. They really help in extending the build script
+functionnality. Just a matter of creating/deleting files in tasks/.*
+
+## Output
+
+
+
+    10:11 mklabs/h5bp-script-tags «v0.4.8/1.0.27»  (master)  » h5bp-cake htmltags
+    verbose: start htmltags  »
+    verbose: start mkdirs  »
+    verbose: start clean  »
+    verbose: start intro  »
+    input:  intro »
+      ====================================================================
+      Welcome to the ★ HTML5 Boilerplate Build Script! ★
+
+      We're going to get your site all ship-shape and ready for prime time.
+
+      This should take somewhere between 15 seconds and a few minutes,
+      mostly depending on how many images we're going to compress.
+
+      Feel free to come back or stay here and follow along.
+      =====================================================================
+    info:   ✔ end:intro
+    verbose: start check  » 
+    input:  clean »  Cleaning up previous build directory...
+    info:   ✔ end:clean
+    input:  mkdirs »  Copying 14 files over to intermediate from .
+    info:   ✔ end:mkdirs
+    input:  htmltags »  Processing bundle: site.css with css css processor 
+    CSS processor:  site.css
+    content is [ '  <!-- [[ build css site.css ]] -->',
+      '  <link rel="stylesheet" href="css/style.css">',
+      '  <!-- [[ endbuild ]] -->' ]
+    Replace for bundle site.css
+    input:  htmltags »  Processing bundle: head-scripts.js with js css processor 
+    JS processor:  head-scripts.js
+    Replace for bundle head-scripts.js
+    input:  htmltags »  Processing bundle: libs.js with js css processor 
+    JS processor:  libs.js
+    Replace for bundle libs.js
+    input:  htmltags »  Processing bundle: app.js with js css processor 
+    JS processor:  app.js
+    Replace for bundle app.js
+    info:   ✔ end:htmltags
+
+
 ### index.html
 
 Before:
