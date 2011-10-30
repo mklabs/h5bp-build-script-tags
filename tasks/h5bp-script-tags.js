@@ -100,7 +100,7 @@ function processFile(em) { return function (file) {
     ln = bundles.length,
     next = function(em) {
       if(--ln) return;
-      console.log('Body: ', body);
+      //console.log('Body: ', body);
       fs.writeFileSync(file, body, 'utf8');
       em.emit('end');
     };
@@ -111,14 +111,13 @@ function processFile(em) { return function (file) {
       processor = processors[parts[0]],
       content = sections[bundle].join('\n');
 
-    em.emit('log', 'Processing bundle: ' + parts[1] + ' with ' + parts[0] + ' css processor ');
+    em.emit('log', 'Processing bundle: ' + parts[1] + ' with ' + parts[0] + ' processor ');
 
     // Processors are the files in processors/, a [[ build processor filename.ext ]] directive
     // directly drives which processors handle the replacement.
     if(!processor) return em.emit('error', new Error('Unkown processor: ' + parts[0]));
 
     var handler = processor(file, content, parts[1]);
-
 
     // Processors are the files in processors/, a [[ build processor filename.ext ]] directive
     // directly drives wich processors handle the replacement.
@@ -127,19 +126,16 @@ function processFile(em) { return function (file) {
       return next(em);
     }
 
-    processor(file, content, parts[1])
-      .on('end', function(bundle, output, desc) {
+    handler
+      .on('end', function(html, replacement) {
         // file: full path of the file to create/update
         // content: the concat/min results of processors
         console.log('Coool, it works.');
 
         em.emit('log', 'Processors ' + parts[0] + ' done');
-        em.emit('data', {
-          file: bundle,
-          desc: desc
-        });
+        em.emit('data', arguments);
 
-        body = body.replace(desc.fragment, desc.replacement);
+        body = body.replace(html, replacement);
         next(em);
       });
 

@@ -1,42 +1,79 @@
 
-var regbuild = /^\s*<!--\s*\[\[\s*build\s(\w+)\s([\w\d\.-_]+)\s*\]\]\s*-->/,
-  regend = /\s*<!--\s*\[\[\s*endbuild\s*\]\]\s*-->/,
-  regscript = /\s*<script.+src=['"]*([\w\d\.\-_\/]+)['"]*\s*><\/script>/,
-  path = require('path'),
+// Run some jQuery on a html fragment
+var jsdom = require('jsdom'),
+  crypto = require('crypto'),
   fs = require('fs'),
-  crypto = require('crypto');
+  path = require('path'),
+  EventEmitter = require('events').EventEmitter,
+  mkdirp = require('mkdirp'),
+  uglify = require('uglify-js'),
+  jquery = fs.readFileSync(path.join(__dirname, '..', 'support', 'jquery.js'), 'utf8');
 
-module.exports = function(file, content, bundle) {
-  console.log('JS processor: ', file);
+// API usage example
+// needs refactoring
+var processor = module.exports = function processor(file, content, output) {
+  console.log('JS processor: ', file, arguments);
 
-  return function(match) {
-    console.log('Replace for bundle', file);
 
-    var lines = match.split('\n')
-      // filter marker
-      .filter(function(l) {
-        return !(regbuild.test(l) || regend.test(l));
+  var emitter = new EventEmitter();
+
+  var base = path.resolve(file),
+    filename = path.basename(file),
+    dirname = path.dirname(base);
+
+  jsdom.env({
+    html: content,
+    src: [jquery],
+    done: function(err, window) {
+      var $ = window.$;
+
+      // example:
+      //  Listing all script tags in the snippet of html
+      //
+      var files = [];
+      $('script[src]').each(function() {
+        var src = $(this).attr('src');
+        console.log(' » ', filename, $(this).attr('src'));
+        files.push(src);
       });
 
-    var scripts = lines.filter(function(l) {
-      return regscript.test(l);
-    }).map(function(l) {
-      return fs.readFileSync(path.resolve(l.match(regscript)[1]), 'utf8');
-    }).join('\n\n');
+      // Get the content of each files
+      files = files.map(function(file) {
+        var minified = /min\.js$/.test(file),
+          body = fs.readFileSync(path.resolve(file), 'utf8');
+        return minified ? body : min(body);
+      }).join('\n\n');
 
-    var name = checksum(scripts) + '.' + path.basename(bundle),
-      dir = path.join(path.dirname(file), path.dirname(bundle)),
-      dest = path.join(dir, name);
+      // rev after minification for now, will probably change to be done right after concat
+      // and do the min after that.
 
-    fs.writeFileSync(dest, scripts);
+      var href = path.join(path.dirname(output), checksum(files) + '.' + path.basename(output)),
+        dest = path.join(dirname, href);
 
-    var src = bundle.split('/').slice(0, -1).concat(name).join('/');
-    return '<script defer src="' + src + '"></script>';
-  };
+      fs.writeFileSync(dest, files);
+      emitter.emit('end', content, '<script defer src="' + href + '"></script>');
+    }
+  });
+
+  return emitter;
 };
+
+function toArray(obj) {
+  return Array.prototype.slice.call(obj);
+}
 
 function checksum (file) {
   var md5 = crypto.createHash('md5');
   md5.update(file);
   return md5.digest('hex');
+}
+
+function min(source) {
+  var jsp = uglify.parser,
+    pro = uglify.uglify,
+    ast = jsp.parse(source);
+
+  ast = pro.ast_mangle(ast);
+  ast = pro.ast_squeeze(ast);
+  return pro.gen_code(ast);
 }

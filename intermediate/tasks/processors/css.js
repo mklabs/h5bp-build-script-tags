@@ -73,10 +73,7 @@ processor.dom = function dom(filename, basename, output, html, src) {
 
           // finally update the bundle reference to catch up with reved name
           var href = output.split('/').slice(0, -1).concat(name).join('/');
-          return emitter.emit('end', name, sources, {
-            fragment: html,
-            replacement: '<link rel="stylesheet href="' + href + '">'
-          });
+          return emitter.emit('end', html, '<link rel="stylesheet href="' + href + '">');
         });
       });
     }
