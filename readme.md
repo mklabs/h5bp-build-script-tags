@@ -149,7 +149,6 @@ functionnality. Just a matter of creating/deleting files in tasks/.*
 
 Before:
 
-
       <!doctype html>
       <!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
       <!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
@@ -165,11 +164,11 @@ Before:
 
         <meta name="viewport" content="width=device-width,initial-scale=1">
 
-        <!-- [[ build css site.css ]] -->
+        <!-- [[ build css css/site.css ]] -->
         <link rel="stylesheet" href="css/style.css">
         <!-- [[ endbuild ]] -->
 
-        <!-- [[ build js head-scripts.js ]] -->
+        <!-- [[ build js js/head-scripts.js ]] -->
         <script src="js/libs/modernizr-2.0.6.min.js"></script>
         <!-- [[ endbuild ]] -->
       </head>
@@ -192,12 +191,12 @@ Before:
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/libs/jquery-1.6.2.min.js"><\/script>')</script>
 
-        <!-- [[ build js libs.js ]] -->
+        <!-- [[ build js js/libs.js ]] -->
         <script defer src="js/libs/underscore-min.js"></script>
         <script defer src="js/libs/backbone-min.js"></script>
         <!-- [[ endbuild ]] -->
 
-        <!-- [[ build js app.js ]] -->
+        <!-- [[ build js js/app.js ]] -->
         <script defer src="js/plugins.js"></script>
         <script defer src="js/script.js"></script>
 
@@ -217,9 +216,7 @@ Before:
       </body>
       </html>
 
-
 After the `htmltags` task:
-
 
       <!doctype html>
       <!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
@@ -236,11 +233,9 @@ After the `htmltags` task:
 
         <meta name="viewport" content="width=device-width,initial-scale=1">
 
-        <!-- [[ build css site.css ]] -->
-        <link rel="stylesheet" href="css/style.css">
-        <!-- [[ endbuild ]] -->
+      <link rel="stylesheet href="css/988118e30102986f28cfcdb92eaf97db.site.css">
 
-      <script defer src="/js/873b6da0f0ac40656c83caee9ff03a54.head-scripts-concat.js" ></script>
+      <script defer src="js/873b6da0f0ac40656c83caee9ff03a54.head-scripts.js"></script>
       </head>
 
       <body>
@@ -261,9 +256,9 @@ After the `htmltags` task:
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/libs/jquery-1.6.2.min.js"><\/script>')</script>
 
-      <script defer src="/js/e0c8abb7a5599a1caf8d00591d7691ff.libs-concat.js" ></script>
+      <script defer src="js/e0c8abb7a5599a1caf8d00591d7691ff.libs.js"></script>
 
-      <script defer src="/js/d636120810e8c16e2229900bd71458f7.app-concat.js" ></script>
+      <script defer src="js/d636120810e8c16e2229900bd71458f7.app.js"></script>
 
         <!--[if lt IE 7 ]>
           <script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js"></script>
@@ -272,6 +267,8 @@ After the `htmltags` task:
 
       </body>
       </html>
+
+
 
 ## Generated files
 

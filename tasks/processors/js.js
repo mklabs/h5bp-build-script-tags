@@ -24,13 +24,14 @@ module.exports = function(file, content, bundle) {
       return fs.readFileSync(path.resolve(l.match(regscript)[1]), 'utf8');
     }).join('\n\n');
 
-    var md5 = checksum(scripts);
+    var name = checksum(scripts) + '.' + path.basename(bundle),
+      dir = path.join(path.dirname(file), path.dirname(bundle)),
+      dest = path.join(dir, name);
 
-    var filename = path.resolve(bundle);
+    fs.writeFileSync(dest, scripts);
 
-    fs.writeFileSync(filename, scripts);
-    // filename = filename.replace(destination, '');
-    return '<script defer src="' + bundle + '" ></script>';
+    var src = bundle.split('/').slice(0, -1).concat(name).join('/');
+    return '<script defer src="' + src + '"></script>';
   };
 };
 

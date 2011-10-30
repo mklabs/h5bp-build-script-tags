@@ -100,13 +100,11 @@ function processFile(em) { return function (file) {
     ln = bundles.length,
     next = function(em) {
       if(--ln) return;
-
       console.log('Body: ', body);
-      //fs.writeFileSync(file, body, 'utf8');
+      fs.writeFileSync(file, body, 'utf8');
       em.emit('end');
     };
 
-  console.log(bundles, bundles.length);
 
   bundles.forEach(function(bundle) {
     var parts = bundle.split(':'),
@@ -125,17 +123,12 @@ function processFile(em) { return function (file) {
     // Processors are the files in processors/, a [[ build processor filename.ext ]] directive
     // directly drives wich processors handle the replacement.
     if(!(handler instanceof EventEmitter)) {
-      console.log(handler.toString());
       body = body.replace(content, handler);
       return next(em);
     }
 
-    // todo: remove, just for testing
-
-    return console.log('typeof: ', parts[0], typeof handler, handler instanceof EventEmitter);
-
     processor(file, content, parts[1])
-      .on('end', function(bundle, body, desc) {
+      .on('end', function(bundle, output, desc) {
         // file: full path of the file to create/update
         // content: the concat/min results of processors
         console.log('Coool, it works.');

@@ -63,22 +63,19 @@ processor.dom = function dom(filename, basename, output, html, src) {
         dir = path.dirname(dest),
         name = checksum(sources) + '.' + path.basename(dest);
 
-      console.log('Writing to ', path.resolve(basename, output));
-      console.log('Create folder ', dir ,'if not already there');
-
       mkdirp(dir, 0755, function(err) {
         // throw for now..
         if(err) throw err;
 
-        console.log('Created dir', dir);
-        console.log('Now writes revved file: ', name);
-
         fs.writeFile(path.join(dir, name), sources, function(err) {
           // throw for now..
           if(err) throw err;
+
+          // finally update the bundle reference to catch up with reved name
+          var href = output.split('/').slice(0, -1).concat(name).join('/');
           return emitter.emit('end', name, sources, {
             fragment: html,
-            replacement: '<link rel="stylesheet href="' + output + '">'
+            replacement: '<link rel="stylesheet href="' + href + '">'
           });
         });
       });
