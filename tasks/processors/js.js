@@ -6,7 +6,7 @@ var regbuild = /^\s*<!--\s*\[\[\s*build\s(\w+)\s([\w\d\.-_]+)\s*\]\]\s*-->/,
   fs = require('fs'),
   crypto = require('crypto');
 
-module.exports = function(file, lines) {
+module.exports = function(file, content, bundle) {
   console.log('JS processor: ', file);
 
   return function(match) {
@@ -26,11 +26,11 @@ module.exports = function(file, lines) {
 
     var md5 = checksum(scripts);
 
-    var destination  = path.join(__dirname, '..', '..', dir.intermediate),
-    filename = path.join(destination, dir.js.main, md5 + '.' + file.replace(/\.js$/, '-concat.js'));
+    var filename = path.resolve(bundle);
+
     fs.writeFileSync(filename, scripts);
-    filename = filename.replace(destination, '');
-    return '<script defer src="' + filename + '" ></script>';
+    // filename = filename.replace(destination, '');
+    return '<script defer src="' + bundle + '" ></script>';
   };
 };
 

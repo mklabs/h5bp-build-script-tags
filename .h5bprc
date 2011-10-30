@@ -24,7 +24,7 @@
       "js": {
         "bypass": ""
       },
-      "exclude": ".* readme.md, **/.git/**, **/.svn/**, test/**, demo/**, intermediate/**, publish/**, build/**, **/nbproject/**, *.komodoproject, **/.komodotools/**, **/dwsync.xml, **_notes, **/.hg/**, **/.idea/**",
+      "exclude": ".* readme.md node_modules/ **/.git/**, **/.svn/**, test/**, demo/**, intermediate/**, publish/**, build/**, **/nbproject/**, *.komodoproject, **/.komodotools/**, **/dwsync.xml, **_notes, **/.hg/**, **/.idea/**",
       "stylesheets": ""
     },
     "root": {

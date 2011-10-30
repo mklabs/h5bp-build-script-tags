@@ -21,7 +21,7 @@ JS, or maintain several different patterns.
 
 **Status**: Ok for JS bundles/processor.
 
-## Synopsys
+## Synopsis
 
     h5bp-cake htmltags
 
@@ -34,8 +34,6 @@ path/to/filename.js ]]`.
 A processor might be everything. There is now a valid JS processor, and the
 skeleton for the CSS one. They simply follow similar patterns, where
 they're used as `.replace()` handler.
-
-
 
 
     module.exports = function(file, lines) {
@@ -78,7 +76,7 @@ be used in development. The processors must do their tasks based on the
 html markup, it generally involves the parsing ot link/script tags.
 
 You can checkout the tasks implementation in tasks/, these are the
-plugins files that can interract with the main build script. And the
+plugins files that can interact with the main build script. And the
 tasks/processors are the files inlvoded in handling the html markup,
 they simply return the new html fragment.
 
@@ -98,7 +96,7 @@ on your system.
 
 ## Example
 
-This repo is maily an example.
+This repo is mainly an example.
 
 *Note: Plugins are hot. They really help in extending the build script
 functionnality. Just a matter of creating/deleting files in tasks/.*

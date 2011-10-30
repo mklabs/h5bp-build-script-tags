@@ -1,11 +1,12 @@
 
 var path = require('path'),
-fs = require('fs');
+  fs = require('fs'),
+  EventEmitter = require('events').EventEmitter;
 
 // https://github.com/h5bp/html5-boilerplate/issues/831
 //
 
-var regbuild = /^\s*<!--\s*\[\[\s*build\s(\w+)\s([\w\d\.\-_]+)\s*\]\]\s*-->/,
+var regbuild = /^\s*<!--\s*\[\[\s*build\s(\w+)\s([\w\d\.\-_\/]+)\s*\]\]\s*-->/,
   regend = /\s*<!--\s*\[\[\s*endbuild\s*\]\]\s*-->/;
 
 // Load processors
@@ -40,10 +41,8 @@ fs.readdirSync(path.join(__dirname, 'processors')).forEach(function(file) {
 //      <!-- [[ endbuild ]] -->
 //
 
-task('htmltags', 'Process html file ', function(options, em) {
-
+task('htmltags', 'Process html files', function(options, em) {
   invoke('mkdirs');
-
   gem.on('end:mkdirs', function() {
     var source = path.join(__dirname, '..', dir.intermediate),
       files = file.pages.default.include.split(', ').map(function(f) {
@@ -51,9 +50,20 @@ task('htmltags', 'Process html file ', function(options, em) {
       });
 
     files.forEach(processFile(em));
-    em.emit('end');
   });
 });
+
+task('usemin', 'Replace bundle reference in HTML markup', function(options, em) {
+  em.emit('log', 'doing nothing.. for the sake of testing..');
+
+  setTimeout(function(){ em.emit('end'); }, 2000);
+});
+
+task('js.all.minify', 'Overiddes costly minification process', function(options, em) {
+  em.emit('log', 'doing nothing.. for the sake of testing..');
+  setTimeout(function(){ em.emit('end'); }, 2000);
+});
+
 
 function processFile(em) { return function (file) {
   if(!path.existsSync(file)) return;
@@ -85,21 +95,63 @@ function processFile(em) { return function (file) {
     }
   });
 
-  //sections = sections.map(trim);
-  Object.keys(sections).forEach(function(bundle) {
-    var parts = bundle.split(':'),
-      processor = parts[0],
-      file = parts[1],
-      content = sections[bundle];
 
-    em.emit('log', 'Processing bundle: ' + file + ' with ' + processor + ' css processor ');
+  var bundles = Object.keys(sections),
+    ln = bundles.length,
+    next = function(em) {
+      if(--ln) return;
+
+      console.log('Body: ', body);
+      //fs.writeFileSync(file, body, 'utf8');
+      em.emit('end');
+    };
+
+  console.log(bundles, bundles.length);
+
+  bundles.forEach(function(bundle) {
+    var parts = bundle.split(':'),
+      processor = processors[parts[0]],
+      content = sections[bundle].join('\n');
+
+    em.emit('log', 'Processing bundle: ' + parts[1] + ' with ' + parts[0] + ' css processor ');
+
+    // Processors are the files in processors/, a [[ build processor filename.ext ]] directive
+    // directly drives which processors handle the replacement.
+    if(!processor) return em.emit('error', new Error('Unkown processor: ' + parts[0]));
+
+    var handler = processor(file, content, parts[1]);
+
 
     // Processors are the files in processors/, a [[ build processor filename.ext ]] directive
     // directly drives wich processors handle the replacement.
-    body = body.replace(content.join('\n'), processors[processor].call(em, file, content));
+    if(!(handler instanceof EventEmitter)) {
+      console.log(handler.toString());
+      body = body.replace(content, handler);
+      return next(em);
+    }
+
+    // todo: remove, just for testing
+
+    return console.log('typeof: ', parts[0], typeof handler, handler instanceof EventEmitter);
+
+    processor(file, content, parts[1])
+      .on('end', function(bundle, body, desc) {
+        // file: full path of the file to create/update
+        // content: the concat/min results of processors
+        console.log('Coool, it works.');
+
+        em.emit('log', 'Processors ' + parts[0] + ' done');
+        em.emit('data', {
+          file: bundle,
+          desc: desc
+        });
+
+        body = body.replace(desc.fragment, desc.replacement);
+        next(em);
+      });
+
   });
 
-  fs.writeFileSync(file, body, 'utf8');
 }}
 
 function trim(line) {
