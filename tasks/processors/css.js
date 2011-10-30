@@ -9,4 +9,4 @@ module.exports = function(file, lines) {
     // todo: do the same as js blocks here
     return match;
   };
-}
+};

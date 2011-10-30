@@ -28,11 +28,59 @@ JS, or maintain several different patterns.
 A `[[ build js file.js ]]` directive is parsed as ``[[ build processor
 path/to/filename.js ]]`.
 
-A processor might everything. There is now a valid JS processor, and the
-skeletton for the CSS one.
+
+## Processors
+
+A processor might be everything. There is now a valid JS processor, and the
+skeleton for the CSS one. They simply follow similar patterns, where
+they're used as `.replace()` handler.
+
+
+
+
+    module.exports = function(file, lines) {
+      console.log('CSS processor: ', file);
+      console.log('content is', lines);
+
+      // This is the curried replace function, the `match` is the
+      // html markup within `[[ build css bundle.css]] ... [[ endbuild ]]`
+      return function(match) {
+        console.log('Replace for bundle', file);
+
+        // do the processing here, and make sure to return the result.
+        // todo: do the same as js blocks here
+
+        // This is the place where you'd probably need to parse the
+        // match value, looking for any stylesheets import, doing the
+        // concat/min/reving/write, and returning the new `<link />`
+        // to load the new reved css files.
+
+        // To keep things simple, you could probably just use
+        // synchronous implementation, since it's a one time hit.
+        // Doing it async is definitely possible, but would require
+        // a better defined api.
+
+        return match;
+      };
+    };
+
+To create a processor, one would create a new file in
+`tasks/processors`, name it appropriately, and implement the processing
+function. Then it will be available to use in template files, with the
+inine html comments.
+
+        <!-- [[ build processorname output.ext ]] -->
+          ... html markup ...
+        <!-- [[ endbuild ]] -->
+
+Html markup should be semantically valid, so that the html files could
+be used in development. The processors must do their tasks based on the
+html markup, it generally involves the parsing ot link/script tags.
 
 You can checkout the tasks implementation in tasks/, these are the
-plugins files that can interract with the main build script.
+plugins files that can interract with the main build script. And the
+tasks/processors are the files inlvoded in handling the html markup,
+they simply return the new html fragment.
 
 ## Install
 
@@ -76,24 +124,24 @@ functionnality. Just a matter of creating/deleting files in tasks/.*
       Feel free to come back or stay here and follow along.
       =====================================================================
     info:   ✔ end:intro
-    verbose: start check  » 
+    verbose: start check  »
     input:  clean »  Cleaning up previous build directory...
     info:   ✔ end:clean
     input:  mkdirs »  Copying 14 files over to intermediate from .
     info:   ✔ end:mkdirs
-    input:  htmltags »  Processing bundle: site.css with css css processor 
+    input:  htmltags »  Processing bundle: site.css with css css processor
     CSS processor:  site.css
     content is [ '  <!-- [[ build css site.css ]] -->',
       '  <link rel="stylesheet" href="css/style.css">',
       '  <!-- [[ endbuild ]] -->' ]
     Replace for bundle site.css
-    input:  htmltags »  Processing bundle: head-scripts.js with js css processor 
+    input:  htmltags »  Processing bundle: head-scripts.js with js css processor
     JS processor:  head-scripts.js
     Replace for bundle head-scripts.js
-    input:  htmltags »  Processing bundle: libs.js with js css processor 
+    input:  htmltags »  Processing bundle: libs.js with js css processor
     JS processor:  libs.js
     Replace for bundle libs.js
-    input:  htmltags »  Processing bundle: app.js with js css processor 
+    input:  htmltags »  Processing bundle: app.js with js css processor
     JS processor:  app.js
     Replace for bundle app.js
     info:   ✔ end:htmltags
@@ -172,7 +220,7 @@ Before:
       </html>
 
 
-After the `htmltags` task: 
+After the `htmltags` task:
 
 
       <!doctype html>
