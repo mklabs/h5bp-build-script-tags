@@ -29,16 +29,18 @@ Should install the package.json dependencies, and properly link the
 `./bin/h5bp-cake` script so that you can call `h5bp-cake` from anywhere
 on your system.
 
-Then, you'll need to install the dependencies for the tasks in this
+Then, you'll need to install the dependencies for the `tasks/` in this
 repository:
 
-    git clone mklabs/h5bp-script-tags
-    cd h5bp-script-tags
+    git clone mklabs/h5bp-build-script-tags
+    cd h5bp-build-script-tags
     npm install
 
 ## Example
 
 This repo is mainly an example.
+
+...
 
 ## Processors
 
