@@ -12,7 +12,7 @@ var jsdom = require('jsdom'),
 // API usage example
 // needs refactoring
 var processor = module.exports = function processor(file, content, output) {
-  console.log('JS processor: ', file, arguments);
+  console.log('JS processor: ', file);
 
   var emitter = new EventEmitter();
 
@@ -24,7 +24,7 @@ var processor = module.exports = function processor(file, content, output) {
     html: content,
     src: [jquery],
     done: function(err, window) {
-      var $ = window.$;
+      var $ = jquerify(window.$);
 
       // example:
       //  Listing all script tags in the snippet of html
@@ -36,21 +36,27 @@ var processor = module.exports = function processor(file, content, output) {
         files.push(src);
       });
 
-      // Get the content of each files
-      files = files.map(function(file) {
-        var minified = /min\.js$/.test(file),
-          body = fs.readFileSync(path.resolve(file), 'utf8');
-        return minified ? body : min(body);
-      }).join('\n\n');
 
-      // rev after minification for now, will probably change to be done right after concat
-      // and do the min after that.
+      // Using md5 plugin helper, concat and rev.
+      $('script[src]').md5('./intermediate/' + output, function(err, hash) {
+        if(err) throw err;
+        console.log('hash:', arguments);
+        var href = output.split('/').slice(0, -1).concat(hash + '.' + path.basename(output)).join('/');
+        emitter.emit('end', content, '<script defer src="' + href + '"></script>');
+      });
 
-      var href = path.join(path.dirname(output), checksum(files) + '.' + path.basename(output)),
-        dest = path.join(dirname, href);
 
-      fs.writeFileSync(dest, files);
-      emitter.emit('end', content, '<script defer src="' + href + '"></script>');
+      /* * /
+      var md5 = $('script[src]')
+        // Concat writes file to ./intermediate/script-concat.js
+        .concat('./intermediate/script-concat.js')
+        // Minify do the concat/min and write files to output (only one of
+        // concat/minify call is required, just here to illusrate)
+        .minify('./intermediate/boyah/scripts.js')
+        // md5, readFile, do the concat and returns the md5 hash for the resulting file
+        .md5();
+      /* */
+
     }
   });
 
@@ -75,4 +81,93 @@ function min(source) {
   ast = pro.ast_mangle(ast);
   ast = pro.ast_squeeze(ast);
   return pro.gen_code(ast);
+}
+
+// Augment jQuery namespace and return the new $ object.
+// Todo: refactor, and use a cache system for these readFileSync calls.
+function jquerify($) {
+
+  $.fn.concat = function(to) {
+    console.log('About to concat stuff', to);
+    var out = [],
+      ln = this.length - 1;
+
+    console.log('Length: ', this.length);
+
+    return this.each(function(i, val) {
+      // concat any assets
+      var src = this.href || this.src,
+        file = fs.readFileSync(path.resolve(src), 'utf8');;
+
+      console.log('concat', path.resolve(src), i);
+      out.push(file);
+
+      console.log(ln);
+      if(ln--) return;
+
+      fs.writeFileSync(path.resolve(to), out.join('\n\n'));
+    });
+  };
+
+  $.fn.minify = function(to) {
+    console.log('About to min stuff', to);
+    var out = [],
+      ln = this.length - 1;
+
+    console.log('Length: ', this.length);
+
+    return this.each(function() {
+      var src = this.href || this.src,
+        file = fs.readFileSync(path.resolve(src), 'utf8'),
+        // todo: the regex to also catch min.css
+        minified = /\min\.js$/.test(path.basename(src)),
+        dest = path.resolve(to),
+        dirname = path.dirname(dest);
+
+      console.log('min', minified, path.resolve(src));
+
+
+      out.push(minified ? file : min(file));
+
+      if(ln--) return;
+      mkdirp(dirname, 0755, function(err) {
+        if(err) throw err;
+        fs.writeFileSync(dest, out.join('\n\n'));
+      });
+    });
+  };
+
+  $.fn.md5 = function(file, cb) {
+    var out = toArray(this).map(function(it) {
+      var src = it.href || it.src;
+      return fs.readFileSync(path.resolve(src), 'utf8');
+    }).join('\n\n');
+
+    // getter: break the chain
+    var md5 = crypto.createHash('md5');
+    md5.update(out);
+
+    var hash = md5.digest('hex');
+
+    if(file && cb) {
+      file = path.resolve(file.split('/').slice(0, -1).concat(hash + '.' + path.basename(file)).join('/'));
+      console.log('File write file to', file);
+      mkdirp(path.dirname(file), 0755, function(err) {
+        if(err) throw err;
+        fs.writeFile(file, out, function(err) {
+          cb(err, hash, file);
+        });
+      });
+    }
+
+    // getter: return hash, break the chain
+    // setter: file specified return this and dont break the chain
+    return file ? this : hash;
+  };
+
+  $.fn.writeTo = function(){
+    return this.each(function(){});
+  };
+
+  return $;
 }
