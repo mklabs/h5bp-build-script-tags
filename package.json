@@ -1,0 +1,10 @@
+{
+  "name": "h5bp-script-tags",
+  "description": "jsdom/jquery + build script experiment",
+  "version": "0.0.1",
+  "dependencies": {
+    "mkdirp": "0.0.7",
+    "uglify-js": "~1.1.1",
+    "jsdom": "~0.2.8"
+  }
+}

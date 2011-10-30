@@ -1,25 +1,12 @@
 # h5bp script tags
 
+jsdom/jquery + build script experiment.
+
+This repository holds codes and test cases related to
+
 * https://github.com/h5bp/html5-boilerplate/issues/831
 
-> The JS concatenation stuff is sort of like that but hard-coded and
-> limited. Maybe we could expand upon it and make the comments more
-> obviously related to the build script and exist in discrete blocks.
-
-
-* > Everything inside a "build block" would be minified, concatenated,
-  and revved into the '[md5].site.css' filename based on the one that is
-specified in the comment. You could use whatever name you want. And
-anything @import-ed inside those stylesheets would be included too.
-
-* > The 'css' part would be a label to attach specific customisations
-  made from within the config file like the compression library used and
-the output directory. So 'css' might specify to use YUI's compressor and
-output to /publish/css/site.css. You might just have 1 for CSS and 1 for
-JS, or maintain several different patterns.
-
-
-**Status**: Ok for JS bundles/processor.
+**Status**: Ok for JS/CSS bundles/processor.
 
 ## Synopsis
 
@@ -28,6 +15,30 @@ JS, or maintain several different patterns.
 A `[[ build js file.js ]]` directive is parsed as ``[[ build processor
 path/to/filename.js ]]`.
 
+## Install
+
+Get latest from dev branch (cake-bin):
+
+    git clone mklabs/html5-boilerplate
+    cd html5-boiletplate/
+    git checkout -b cake-bin origin/cake-bin
+    cd build/cake/
+    npm link
+
+Should install the package.json dependencies, and properly link the
+`./bin/h5bp-cake` script so that you can call `h5bp-cake` from anywhere
+on your system.
+
+Then, you'll need to install the dependencies for the tasks in this
+repository:
+
+    git clone mklabs/h5bp-script-tags
+    cd h5bp-script-tags
+    npm install
+
+## Example
+
+This repo is mainly an example.
 
 ## Processors
 
@@ -80,48 +91,80 @@ plugins files that can interact with the main build script. And the
 tasks/processors are the files inlvoded in handling the html markup,
 they simply return the new html fragment.
 
-## Install
+## jsdom processors
 
-Get latest from dev branch (cake-bin):
+*This is experimental..*
 
-    git clone mklabs/html5-boilerplate
-    cd html5-boiletplate/
-    git checkout -b cake-bin origin/cake-bin
-    cd build/cake/
-    npm link
+Here's the idea:
 
-Should install the package.json dependencies, and properly link the
-`./bin/h5bp-cake` script so that you can call `h5bp-cake` from anywhere
-on your system.
+In the current implementation, processors takes html markup to do their
+task.
+
+This generally involves a lot of regex use. There is a great project
+named [jsdom](https://github.com/tmpvar/jsdom) that would allow us to
+think about a possible jquery usage in processors.
+
+This is just fragment of html markup, so probably processors could use
+jQuery to list whatever tags they want, and just use the jQuery syntax
+to get the list of assets to process.
+
+Then, we could probably extend the jQuery prototype and provides a few
+helper methods to:
+
+* easily do file concatenations
+* minification 
+* revving of concataned scripts (probably before the min, saving the
+  costly minification process when filename changes)
+* write the resulting scripts, in the right place to comply with the
+  overall build script.
 
 ## Example
 
-This repo is mainly an example.
+Check out the `tasks/processors` folder for real test case. Processors
+could expose an async api, and further make use of jsdom to evaluate a
+snippet of html markup.
 
-*Note: Plugins are hot. They really help in extending the build script
-functionnality. Just a matter of creating/deleting files in tasks/.*
+    var EventEmitter = require('events').EventEmitter,
+      jsdom = require('jsdom'),
+      fs = require('fs'),
+      path = require('path'),
+      jquery = fs.readFileSync(path.join(__dirname, '..', 'support', 'jquery.js'), 'utf8');
+
+
+    var processor = module.exports = function processor(file, content, output) {
+      var em = new EventEmitter;
+
+      jsdom.env({
+        html: content,
+        src: [jquery],
+        done: function(err, window) {
+          var $ = window.$;
+
+          $('script[src]').each(function() {
+            console.log(' » ', filename, $(this).attr('src'));
+          });
+
+          // Using an md5 plugin helper, concat and rev
+          $('script[src]').md5('./intermediate/' + output, function(err, hash) {
+            if(err) throw err;
+            var href = output.split('/').slice(0, -1).concat(hash + '.' + path.basename(output)).join('/');
+            em.emit('end', content, '<script defer src="' + href + '"></script>');
+          });
+
+        }
+      });
+
+      return em;
+    };
+
 
 ## Output
-
 
 
     10:11 mklabs/h5bp-script-tags «v0.4.8/1.0.27»  (master)  » h5bp-cake htmltags
     verbose: start htmltags  »
     verbose: start mkdirs  »
     verbose: start clean  »
-    verbose: start intro  »
-    input:  intro »
-      ====================================================================
-      Welcome to the ★ HTML5 Boilerplate Build Script! ★
-
-      We're going to get your site all ship-shape and ready for prime time.
-
-      This should take somewhere between 15 seconds and a few minutes,
-      mostly depending on how many images we're going to compress.
-
-      Feel free to come back or stay here and follow along.
-      =====================================================================
-    info:   ✔ end:intro
     verbose: start check  »
     input:  clean »  Cleaning up previous build directory...
     info:   ✔ end:clean
@@ -272,6 +315,6 @@ After the `htmltags` task:
 
 ## Generated files
 
-are in `intermediate/` folder, already basic javascript md5 file reving.
+are in `intermediate/` folder.
 
 There's more code to do on the CSS part but the basics are there.

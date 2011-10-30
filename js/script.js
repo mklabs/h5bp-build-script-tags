@@ -4,7 +4,7 @@
 
 
 // https://raw.github.com/mishoo/UglifyJS/master/test/unit/compress/test/whitespace.js
-// testing purppose
+// testing purpose
 function id(a) {
   // Form-Feed
   // Vertical Tab

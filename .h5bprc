@@ -24,7 +24,7 @@
       "js": {
         "bypass": ""
       },
-      "exclude": ".* readme.md node_modules/ tasks/ **/.git/**, **/.svn/**, test/**, demo/**, intermediate/**, publish/**, build/**, **/nbproject/**, *.komodoproject, **/.komodotools/**, **/dwsync.xml, **_notes, **/.hg/**, **/.idea/**",
+      "exclude": ".* readme.md node_modules/ package.json tasks/ .git/",
       "stylesheets": ""
     },
     "root": {
