@@ -2,6 +2,7 @@
 var path = require('path'),
   fs = require('fs'),
   jsdom = require('jsdom'),
+  async = require('async'),
   EventEmitter = require('events').EventEmitter,
   jquery = fs.readFileSync(path.join(__dirname, 'support', 'jquery.js'), 'utf8'),
   plugins = require('./processors/plugins/jquery.fs');
@@ -40,25 +41,53 @@ task('htmltags', 'Process html files', function(options, em) {
         return path.resolve(source, f);
       });
 
-    files.forEach(processFile(em));
+    console.log(files);
+    async.forEach(files, processFile(em), function(err) {
+      if(err) return em.emit('error', err);
+      em.emit('log', 'Good to gooo');
+      em.emit('data', arguments);
+
+      em.emit('end');
+    });
+
   });
 });
 
 
 // ## Helpers
 
-function processFile(em) { return function (file) {
-  if(!path.existsSync(file)) return;
+function processFile(em) { return function (file, cb) {
 
-  var body = fs.readFileSync(file, 'utf8'),
-    sections = parse(body);
 
-  var bundles = Object.keys(sections),
-    ln = bundles.length,
+  return fs.readFile(file, 'utf8', function(err, body) {
+    if(err) return cb(err);
+
+    // bootstrap a jsdom env for each files, done in // for now
+    // may ends up doing it sequentially if needed
+    jsdom.env({
+      html: body,
+      src: [jquery],
+      done: function(err, window) {
+        if(err) return em.emit('error', err);
+        var $ = extend(window.$, em, plugins);
+        // todo: clarify params here, processors should probably don't know
+        // which html fragment is replaced.
+
+        processors.document.call(em, $, file, body, em, function(err) {
+          if(err) return em.emit('error', err);
+          // Write the new content, and keep the doctype safe (innerHTML
+          // string doesnt include it).
+          fs.writeFile(file, '<!doctype html>' + window.document.innerHTML, cb);
+        });
+      }
+    });
+  });
+
+
     // todo: working with a single file, since this is wrapped
     // in a forEach files, the end event will be triggered for each
     // one
-    next = function(err, html, replacement) {
+    var next = function(err, html, replacement) {
       if(err) return em.emit('error', err);
 
       em.emit('log', 'Processor done, replacing with ' + replacement);
@@ -103,34 +132,4 @@ function processFile(em) { return function (file) {
 function extend($, em, pmodule) {
   $.extend($.fn, pmodule($, em));
   return $;
-}
-
-
-function parse(body) {
-  var lines = body.split('\n'),
-    block = false,
-    sections = {},
-    last;
-
-  lines.forEach(function(l) {
-    var build = l.match(regbuild),
-      endbuild = regend.test(l);
-
-    if(build) {
-      block = true;
-      sections[[build[1], build[2]].join(':')] = last = [];
-    }
-
-    // switch back block flag when endbuild
-    if(block && endbuild) {
-      last.push(l);
-      block = false;
-    }
-
-    if(block && last) {
-      last.push(l);
-    }
-  });
-
-  return sections;
 }

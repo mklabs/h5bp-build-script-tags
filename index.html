@@ -13,7 +13,7 @@
 
   <meta name="viewport" content="width=device-width,initial-scale=1">
 
-  <link data-build="css/site.css" rel="stylesheet" href="css/style.css">
+  <link data-build="css/site.css" data-build-foobar="info" rel="stylesheet" href="css/style.css">
 
   <script data-build="js/head-script.js" src="js/libs/modernizr-2.0.6.min.js"></script>
 
@@ -37,13 +37,13 @@
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
   <script>window.jQuery || document.write('<script src="js/libs/jquery-1.6.2.min.js"><\/script>')</script>
 
-  <script defer data-build="js/libs.js" src="js/libs/underscore-min.js"></script>
-  <script defer data-build="js/libs.js" src="js/libs/backbone-min.js"></script>
+  <script defer data-build="js/libs.js" data-build-min="false" src="js/libs/underscore-min.js"></script>
+  <script defer data-build="js/libs.js" data-build-min="false" src="js/libs/backbone-min.js"></script>
 
   <script defer data-build="js/app.js" src="js/plugins.js"></script>
   <script defer data-build="js/app.js" src="js/script.js"></script>
 
-  <script data-build="js/app.js">
+  <script>
     // Change UA-XXXXX-X to be your site's ID
     window._gaq = [['_setAccount','UAXXXXXXXX1'],['_trackPageview'],['_trackPageLoadTime']];
     Modernizr.load({
