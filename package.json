@@ -5,6 +5,10 @@
   "dependencies": {
     "mkdirp": "0.0.7",
     "uglify-js": "~1.1.1",
-    "jsdom": "~0.2.8"
+    "jsdom": "~0.2.8",
+    "cakes": "https://github.com/mklabs/cakes/tarball/master"
+  },
+  "scripts": {
+    "start": "./node_modules/.bin/h5bp-cake htmltags"
   }
 }

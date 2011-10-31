@@ -22,6 +22,16 @@ fs.readdirSync(path.join(__dirname, 'processors')).forEach(function(file) {
   processors[filename] = require(filepath);
 });
 
+task('intro', 'bla bla bla', function(options, em) {
+
+  var intro = [
+    '',
+    "Cool, let's start..",
+  ].join('\n');
+
+  em.emit('log', intro);
+});
+
 task('htmltags', 'Process html files', function(options, em) {
   invoke('mkdirs');
   gem.on('end:mkdirs', function() {
@@ -33,6 +43,9 @@ task('htmltags', 'Process html files', function(options, em) {
     files.forEach(processFile(em));
   });
 });
+
+
+// ## Helpers
 
 function processFile(em) { return function (file) {
   if(!path.existsSync(file)) return;
