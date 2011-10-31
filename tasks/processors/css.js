@@ -1,15 +1,14 @@
 
 // Run some jQuery on a html fragment
 var jsdom = require('jsdom'),
-  crypto = require('crypto'),
   fs = require('fs'),
   path = require('path'),
   EventEmitter = require('events').EventEmitter,
-  mkdirp = require('mkdirp'),
-  jquery = fs.readFileSync(path.join(__dirname, '..', 'support', 'jquery.js'), 'utf8');
+  jquery = fs.readFileSync(path.join(__dirname, '..', 'support', 'jquery.js'), 'utf8'),
+  plugins = require('./plugins/jquery.fs');
 
 // API usage example
-var processor = module.exports = function processor(file, content, output) {
+var processor = module.exports = function processor(file, content, output, em) {
   console.log('CSS processor: ', file);
   // do the processing here, and make sure to return the result.
   // todo: do the same as js blocks here
@@ -21,10 +20,10 @@ var processor = module.exports = function processor(file, content, output) {
     dirname = path.dirname(file);
 
   // needs refactoring
-  return processor.dom(filename, dirname, output, content, [jquery]);
+  return processor.dom(filename, dirname, output, content, [jquery], em);
 };
 
-processor.dom = function dom(filename, basename, output, html, src) {
+processor.dom = function dom(filename, basename, output, html, src, em) {
   var emitter = new EventEmitter();
   //  a match is a valid html fragment
   console.log('Paths are relative to ', basename);
@@ -34,60 +33,26 @@ processor.dom = function dom(filename, basename, output, html, src) {
     html: html,
     src: src,
     done: function(errors, window) {
-      var $ = window.$,
-        sources = [];
-
-      // example:
-      //  Listing all links in the snippet of html
-      //
-      $('link[href]').each(function() {
-        console.log(' » ', $(this).attr('href'));
-      });
-
-      var hrefs = toArray($('link[href]')).map(function(it) {
-        var href = path.resolve(basename, $(it).attr('href'));
-        console.log(' -', href);
-
-        emitter.emit('link', it);
-        return href;
-      });
+      var $ = extend(window.$, em, plugins);
 
       // For each hrefs parsed, get the content of the file, concat them
       // (in the same order), rev the filename, and optionally minify
-      // them
-      sources = hrefs.map(function(source) {
-        return fs.readFileSync(source, 'utf8');
-      }).join('\n\n')
+      // them (todo, add md5 options to min or not)
 
-      var dest = path.resolve(basename, output),
-        dir = path.dirname(dest),
-        name = checksum(sources) + '.' + path.basename(dest);
-
-      mkdirp(dir, 0755, function(err) {
-        // throw for now..
-        if(err) throw err;
-
-        fs.writeFile(path.join(dir, name), sources, function(err) {
-          // throw for now..
-          if(err) throw err;
-
-          // finally update the bundle reference to catch up with reved name
-          var href = output.split('/').slice(0, -1).concat(name).join('/');
-          return emitter.emit('end', html, '<link rel="stylesheet href="' + href + '">');
-        });
+      $('link[href]').md5('intermediate/' + output, function(err, hash, file) {
+        if(err) return em.emit('error', err);
+        em.emit('log', 'Rev concat css files ok ' + output + ' ' + hash);
+        var href = output.split('/').slice(0, -1).concat(hash + '.' + path.basename(output)).join('/');
+        return emitter.emit('end', html, '<link rel="stylesheet href="' + href + '">');
       });
     }
+
   });
 
   return emitter;
 };
 
-function toArray(obj) {
-  return Array.prototype.slice.call(obj);
-}
-
-function checksum (file) {
-  var md5 = crypto.createHash('md5');
-  md5.update(file);
-  return md5.digest('hex');
+function extend($, em, pmodule) {
+  $.extend($.fn, pmodule($, em));
+  return $;
 }
