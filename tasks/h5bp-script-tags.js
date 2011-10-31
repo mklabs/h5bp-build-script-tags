@@ -117,7 +117,7 @@ function processFile(em) { return function (file) {
     // directly drives which processors handle the replacement.
     if(!processor) return em.emit('error', new Error('Unkown processor: ' + parts[0]));
 
-    var handler = processor(file, content, parts[1]);
+    var handler = processor(file, content, parts[1], em);
 
     // Processors are the files in processors/, a [[ build processor filename.ext ]] directive
     // directly drives wich processors handle the replacement.
@@ -130,8 +130,6 @@ function processFile(em) { return function (file) {
       .on('end', function(html, replacement) {
         // file: full path of the file to create/update
         // content: the concat/min results of processors
-        console.log('Coool, it works.');
-
         em.emit('log', 'Processors ' + parts[0] + ' done');
         em.emit('data', arguments);
 
