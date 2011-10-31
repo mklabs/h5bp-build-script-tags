@@ -14,7 +14,7 @@ module.exports = function($, output, html, em, cb) {
     // clarfiy wheter callback/emitter is confusing, or just opt to use
     // the emitter, with a special replace event or something (not end,
     // already has semantic in build script)
-    return cb(null, html, '<link rel="stylesheet href="' + href + '">');
+    return cb(null, html, '<link rel="stylesheet" href="' + href + '">');
   });
 };
 
