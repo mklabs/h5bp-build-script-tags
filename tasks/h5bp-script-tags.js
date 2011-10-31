@@ -1,7 +1,10 @@
 
 var path = require('path'),
   fs = require('fs'),
-  EventEmitter = require('events').EventEmitter;
+  jsdom = require('jsdom'),
+  EventEmitter = require('events').EventEmitter,
+  jquery = fs.readFileSync(path.join(__dirname, 'support', 'jquery.js'), 'utf8'),
+  plugins = require('./processors/plugins/jquery.fs');
 
 // https://github.com/h5bp/html5-boilerplate/issues/831
 //
@@ -19,27 +22,6 @@ fs.readdirSync(path.join(__dirname, 'processors')).forEach(function(file) {
 
   processors[filename] = require(filepath);
 });
-
-
-// > make the comments more obviously related to the build script and exist in discrete blocks
-//
-//      <!-- [[ build css site.css ]] -->
-//          ...stylesheets...
-//      <!-- [[ endbuild ]] -->
-//
-//      <!-- [[ build js head-scripts.js ]] -->
-//        ...scripts that need to be in the head...
-//      <!-- [[ endbuild ]] -->
-//
-//      <!-- [[ build js libs.js ]] -->
-//        ...libraries...
-//      <!-- [[ endbuild ]] -->
-//
-//      <!-- [[ build js site.js ]] -->
-//        ...all your jquery plugins...
-//        ...developer authored scripts...
-//      <!-- [[ endbuild ]] -->
-//
 
 task('htmltags', 'Process html files', function(options, em) {
   invoke('mkdirs');
@@ -98,9 +80,18 @@ function processFile(em) { return function (file) {
 
   var bundles = Object.keys(sections),
     ln = bundles.length,
-    next = function(em) {
+    // todo: working with a single file, since this is wrapped
+    // in a forEach files, the end event will be triggered for each
+    // one
+    next = function(err, html, replacement) {
+      if(err) return em.emit('error', err);
+
+      em.emit('log', 'Processor done, replacing with ' + replacement);
+      body = body.replace(html, replacement);
       if(--ln) return;
-      //console.log('Body: ', body);
+
+      em.emit('log', 'Update ' + file + ' with processed assets.');
+      // Write the new body on latest execustion call
       fs.writeFileSync(file, body, 'utf8');
       em.emit('end');
     };
@@ -117,30 +108,24 @@ function processFile(em) { return function (file) {
     // directly drives which processors handle the replacement.
     if(!processor) return em.emit('error', new Error('Unkown processor: ' + parts[0]));
 
-    var handler = processor(file, content, parts[1], em);
-
-    // Processors are the files in processors/, a [[ build processor filename.ext ]] directive
-    // directly drives wich processors handle the replacement.
-    if(!(handler instanceof EventEmitter)) {
-      body = body.replace(content, handler);
-      return next(em);
-    }
-
-    handler
-      .on('end', function(html, replacement) {
-        // file: full path of the file to create/update
-        // content: the concat/min results of processors
-        em.emit('log', 'Processors ' + parts[0] + ' done');
-        em.emit('data', arguments);
-
-        body = body.replace(html, replacement);
-        next(em);
-      });
-
+    // bootstrap a jsdom env for each files, done in // for now
+    // may ends up doing it sequentially if needed
+    jsdom.env({
+      html: content,
+      src: [jquery],
+      done: function(err, window) {
+        if(err) return em.emit('error', err);
+        var $ = extend(window.$, em, plugins);
+        // todo: clarify params here, processors should probably don't know
+        // which html fragment is replaced.
+        processor.call(em, $, parts[1], content, em, next);
+      }
+    });
   });
 
 }}
 
-function trim(line) {
-  return line.trim();
+function extend($, em, pmodule) {
+  $.extend($.fn, pmodule($, em));
+  return $;
 }
