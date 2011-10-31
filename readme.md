@@ -19,7 +19,7 @@ A `[[ build js file.js ]]` directive is parsed as ``[[ build processor
 path/to/bundle.js ]]`.
 
 ```console
-19:51 mklabs/h5bp-build-script-tags «v0.4.12/1.0.27»  (master*)  » npm start
+$ npm start
 npm info it worked if it ends with ok
 npm info using npm@1.0.27
 npm info using node@v0.4.12
@@ -41,7 +41,7 @@ info:   ✔ end:clean
 input:  mkdirs »  Copying 9 files over to intermediate from .
 info:   ✔ end:mkdirs
 input:  htmltags »  Processing bundle: css/site.css with css processor
-input:  htmltags »  Processing bundle: js/head-scripts.js with js processor
+input:  htmltags »  Processing bundle: js/head-scripts.js with head processor
 input:  htmltags »  Processing bundle: js/libs.js with js processor
 input:  htmltags »  Processing bundle: js/app.js with js processor
 input:  htmltags »  Init jquery.fs module
@@ -49,13 +49,7 @@ data:   {}
 input:  htmltags »  Start of CSS processor
 input:  htmltags »  Init jquery.fs module
 data:   {}
-input:  htmltags »  Start of JS processor
-input:  htmltags »  Concat 0 file
-input:  htmltags »  Concat file » js/libs/modernizr-2.0.6.min.js to /Users/mk/Temp/dev/mklabs/h5bp-build-script-tags/intermediate/foobar/kkkjs/head-scripts.js
-input:  htmltags »  Write concat files to /Users/mk/Temp/dev/mklabs/h5bp-build-script-tags/intermediate/foobar/kkkjs/head-scripts.js
-input:  htmltags »  Concat/Min 0 file
-input:  htmltags »  Minify file » js/libs/modernizr-2.0.6.min.js
-input:  htmltags »  Write minified files to /Users/mk/Temp/dev/mklabs/h5bp-build-script-tags/intermediate/minified/stuff/with/a/long/path/js/head-scripts.js
+input:  htmltags »  Start of JS processor, outputing without defer attribute
 input:  htmltags »  Init jquery.fs module
 data:   {}
 input:  htmltags »  Start of JS processor
@@ -79,17 +73,15 @@ input:  htmltags »  Minify file » js/plugins.js
 input:  htmltags »  Minify file » js/script.js
 input:  htmltags »  Write minified files to /Users/mk/Temp/dev/mklabs/h5bp-build-script-tags/intermediate/minified/stuff/with/a/long/path/js/app.js
 input:  htmltags »  Rev concat css files ok css/site.css 988118e30102986f28cfcdb92eaf97db
-input:  htmltags »  Processor done, replacing with <link rel="stylesheet href="css/988118e30102986f28cfcdb92eaf97db.site.css">
-input:  htmltags »  Processor done, replacing with <script defer src="js/873b6da0f0ac40656c83caee9ff03a54.head-scripts.js"></script>
+input:  htmltags »  Processor done, replacing with <link rel="stylesheet" href="css/988118e30102986f28cfcdb92eaf97db.site.css">
+input:  htmltags »  Processor done, replacing with <script src="js/873b6da0f0ac40656c83caee9ff03a54.head-scripts.js"></script>
 input:  htmltags »  Processor done, replacing with <script defer src="js/e0c8abb7a5599a1caf8d00591d7691ff.libs.js"></script>
 input:  htmltags »  Processor done, replacing with <script defer src="js/2b083070b5f0e6cd43aa8dd41e4401e4.app.js"></script>
 input:  htmltags »  Update /Users/mk/Temp/dev/mklabs/h5bp-build-script-tags/intermediate/index.html with processed assets.
 info:   ✔ end:htmltags
-input:  htmltags »  File created » intermediate/foobar/kkkjs/head-scripts.js
 input:  htmltags »  File created » intermediate/foobar/kkkjs/libs.js
 input:  htmltags »  File created » intermediate/foobar/kkkjs/app.js
 input:  htmltags »  Minification ok js/app.js
-input:  htmltags »  Minification ok js/head-scripts.js
 input:  htmltags »  Minification ok js/libs.js
 npm info poststart h5bp-script-tags@0.0.1
 npm info ok
@@ -302,7 +294,7 @@ After the `htmltags` task:
 
 <link rel="stylesheet" href="css/988118e30102986f28cfcdb92eaf97db.site.css">
 
-<script defer src="js/873b6da0f0ac40656c83caee9ff03a54.head-scripts.js"></script>
+<script src="js/873b6da0f0ac40656c83caee9ff03a54.head-scripts.js"></script>
 </head>
 
 <body>
