@@ -7,7 +7,6 @@ var path = require('path'),
   plugins = require('./processors/plugins/jquery.fs');
 
 // https://github.com/h5bp/html5-boilerplate/issues/831
-//
 
 var regbuild = /^\s*<!--\s*\[\[\s*build\s(\w+)\s([\w\d\.\-_\/]+)\s*\]\]\s*-->/,
   regend = /\s*<!--\s*\[\[\s*endbuild\s*\]\]\s*-->/;
@@ -35,48 +34,11 @@ task('htmltags', 'Process html files', function(options, em) {
   });
 });
 
-task('usemin', 'Replace bundle reference in HTML markup', function(options, em) {
-  em.emit('log', 'doing nothing.. for the sake of testing..');
-
-  setTimeout(function(){ em.emit('end'); }, 2000);
-});
-
-task('js.all.minify', 'Overiddes costly minification process', function(options, em) {
-  em.emit('log', 'doing nothing.. for the sake of testing..');
-  setTimeout(function(){ em.emit('end'); }, 2000);
-});
-
-
 function processFile(em) { return function (file) {
   if(!path.existsSync(file)) return;
 
-  var body = fs.readFileSync(file, 'utf8');
-
-  var lines = body.split('\n'),
-    block = false,
-    sections = {},
-    last;
-
-  lines.forEach(function(l) {
-    var build = l.match(regbuild),
-      endbuild = regend.test(l);
-
-    if(build) {
-      block = true;
-      sections[[build[1], build[2]].join(':')] = last = [];
-    }
-
-    // switch back block flag when endbuild
-    if(block && endbuild) {
-      last.push(l);
-      block = false;
-    }
-
-    if(block && last) {
-      last.push(l);
-    }
-  });
-
+  var body = fs.readFileSync(file, 'utf8'),
+    sections = parse(body);
 
   var bundles = Object.keys(sections),
     ln = bundles.length,
@@ -128,4 +90,34 @@ function processFile(em) { return function (file) {
 function extend($, em, pmodule) {
   $.extend($.fn, pmodule($, em));
   return $;
+}
+
+
+function parse(body) {
+  var lines = body.split('\n'),
+    block = false,
+    sections = {},
+    last;
+
+  lines.forEach(function(l) {
+    var build = l.match(regbuild),
+      endbuild = regend.test(l);
+
+    if(build) {
+      block = true;
+      sections[[build[1], build[2]].join(':')] = last = [];
+    }
+
+    // switch back block flag when endbuild
+    if(block && endbuild) {
+      last.push(l);
+      block = false;
+    }
+
+    if(block && last) {
+      last.push(l);
+    }
+  });
+
+  return sections;
 }
