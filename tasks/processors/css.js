@@ -10,11 +10,6 @@ var jsdom = require('jsdom'),
 // API usage example
 var processor = module.exports = function processor(file, content, output, em) {
   console.log('CSS processor: ', file);
-  // do the processing here, and make sure to return the result.
-  // todo: do the same as js blocks here
-  //
-  // This is an instance of event emitter, the task could listen for
-  // specific events, namely the end one.
 
   var filename = path.basename(file),
     dirname = path.dirname(file);
@@ -34,10 +29,6 @@ processor.dom = function dom(filename, basename, output, html, src, em) {
     src: src,
     done: function(errors, window) {
       var $ = extend(window.$, em, plugins);
-
-      // For each hrefs parsed, get the content of the file, concat them
-      // (in the same order), rev the filename, and optionally minify
-      // them (todo, add md5 options to min or not)
 
       $('link[href]').md5('intermediate/' + output, function(err, hash, file) {
         if(err) return em.emit('error', err);
