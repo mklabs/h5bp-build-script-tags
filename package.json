@@ -27,6 +27,6 @@
     "doc": "./"
   },
   "config": {
-    "doc": "h5bp-script-tags.html"
+    "doc": "docs/h5bp-script-tags.html"
   }
 }

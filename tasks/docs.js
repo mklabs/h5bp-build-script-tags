@@ -39,6 +39,26 @@ task('docs', 'Generates documention, based on the likely location of directories
   }
 });
 
+task('gh-pages', 'Set up a gh-pages branch.', function(options, em) {
+  em.emit('log', 'Setting up a gh-pages branch');
+
+  var commands = [
+    'git symbolic-ref HEAD refs/heads/gh-pages',
+    'rm .git/index',
+    'git add docs/'
+    'git clean -fdx',
+    'git mv docs/index.html index.html',
+    'git commit -m "Docs commit"'
+  ].join('&&');
+
+  exec(commands, function(err, stdout) {
+    if(err) return em.emit('error', err);
+    em.emit('silly', stdout);
+    em.emit('end');
+  });
+});
+
+
 
 
 
