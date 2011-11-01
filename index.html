@@ -1,0 +1,459 @@
+<!doctype html>
+<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!-- Consider adding a manifest.appcache: h5bp.com/d/Offline -->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>h5bp-script-tags :: jsdom/jquery + build script experiment</title>
+  <meta name="description" content="jsdom/jquery + build script experiment ">
+  <meta name="author" content="">
+  <!-- Mobile viewport optimized: j.mp/bplateviewport -->
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    /* HTML5 ✰ Boilerplate
+     * ==|== normalize ==========================================================
+     */
+    article, aside, details, figcaption, figure, footer, header, hgroup, nav, section { display: block; }
+    audio, canvas, video { display: inline-block; *display: inline; *zoom: 1; }
+    audio:not([controls]) { display: none; }
+    [hidden] { display: none; }
+    html { font-size: 100%; overflow-y: scroll; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    body { margin: 0; font-size: 13px; line-height: 1.231; }
+    body, button, input, select, textarea { font-family: sans-serif; color: #222; }
+    ::-moz-selection { background: #fe57a1; color: #fff; text-shadow: none; }
+    ::selection { background: #fe57a1; color: #fff; text-shadow: none; }
+    a { color: #00e; }
+    a:visited { color: #551a8b; }
+    a:hover { color: #06e; }
+    a:focus { outline: thin dotted; }
+    a:hover, a:active { outline: 0; }
+    abbr[title] { border-bottom: 1px dotted; }
+    b, strong { font-weight: bold; }
+    blockquote { margin: 1em 40px; }
+    dfn { font-style: italic; }
+    hr { display: block; height: 1px; border: 0; border-top: 1px solid #ccc; margin: 1em 0; padding: 0; }
+    ins { background: #ff9; color: #000; text-decoration: none; }
+    mark { background: #ff0; color: #000; font-style: italic; font-weight: bold; }
+    pre, code, kbd, samp { font-family: monospace, monospace; _font-family: 'courier new', monospace; font-size: 1em; }
+    pre { white-space: pre; white-space: pre-wrap; word-wrap: break-word; }
+    q { quotes: none; }
+    q:before, q:after { content: ""; content: none; }
+    small { font-size: 85%; }
+    sub, sup { font-size: 75%; line-height: 0; position: relative; vertical-align: baseline; }
+    sup { top: -0.5em; }
+    sub { bottom: -0.25em; }
+    ul, ol { margin: 1em 0; padding: 0 0 0 40px; }
+    dd { margin: 0 0 0 40px; }
+    nav ul, nav ol { list-style: none; list-style-image: none; margin: 0; padding: 0; }
+    img { border: 0; -ms-interpolation-mode: bicubic; vertical-align: middle; }
+    svg:not(:root) { overflow: hidden; }
+    figure { margin: 0; }
+    form { margin: 0; }
+    fieldset { border: 0; margin: 0; padding: 0; }
+    label { cursor: pointer; }
+    legend { border: 0; *margin-left: -7px; padding: 0; }
+    button, input, select, textarea { font-size: 100%; margin: 0; vertical-align: baseline; *vertical-align: middle; }
+    button, input { line-height: normal; *overflow: visible; }
+    table button, table input { *overflow: auto; }
+    button, input[type="button"], input[type="reset"], input[type="submit"] { cursor: pointer; -webkit-appearance: button; }
+    input[type="checkbox"], input[type="radio"] { box-sizing: border-box; }
+    input[type="search"] { -webkit-appearance: textfield; -moz-box-sizing: content-box; -webkit-box-sizing: content-box; box-sizing: content-box; }
+    input[type="search"]::-webkit-search-decoration { -webkit-appearance: none; }
+    button::-moz-focus-inner, input::-moz-focus-inner { border: 0; padding: 0; }
+    textarea { overflow: auto; vertical-align: top; resize: vertical; }
+    input:valid, textarea:valid {  }
+    input:invalid, textarea:invalid { background-color: #f0dddd; }
+    table { border-collapse: collapse; border-spacing: 0; }
+    td { vertical-align: top; }
+    /* ==|== primary styles =====================================================
+       Author: 
+       ========================================================================== */
+    body {
+      padding: 50px;
+      color: #8b8b8b;
+    }
+    h1, h2, h3 {
+      font-size: 33px;
+      font-weight: normal;
+      color: #333;
+      -webkit-font-smoothing: antialiased;
+    }
+    h2 {
+      padding: 5px 0;
+      font-size: 24px;
+      border-bottom: 3px solid #eee;
+    }
+    h3 {
+      padding: 5px 0;
+      font-size: 18px;
+      border-bottom: 3px solid #eee;
+    }
+    a { color: #00e; text-decoration: none; }
+    a:visited { color: #06e; }
+    a:hover { color: #06e; text-decoration: underline; }
+    a:focus { outline: thin dotted; }
+    a:hover, a:active { outline: 0; }
+    .docs { text-align: right }
+    /* ==|== non-semantic helper classes ======================================== */
+    .ir { display: block; border: 0; text-indent: -999em; overflow: hidden; background-color: transparent; background-repeat: no-repeat; text-align: left; direction: ltr; }
+    .ir br { display: none; }
+    .hidden { display: none !important; visibility: hidden; }
+    .visuallyhidden { border: 0; clip: rect(0 0 0 0); height: 1px; margin: -1px; overflow: hidden; padding: 0; position: absolute; width: 1px; }
+    .visuallyhidden.focusable:active, .visuallyhidden.focusable:focus { clip: auto; height: auto; margin: 0; overflow: visible; position: static; width: auto; }
+    .invisible { visibility: hidden; }
+    .clearfix:before, .clearfix:after { content: ""; display: table; }
+    .clearfix:after { clear: both; }
+    .clearfix { zoom: 1; }
+    /* ==|== media queries ====================================================== */
+    @media only screen and (min-width: 480px) {
+    }
+    @media only screen and (min-width: 768px) {
+    }
+    /* ==|== print styles ======================================================= */
+    @media print {
+      * { background: transparent !important; color: black !important; text-shadow: none !important; filter:none !important; -ms-filter: none !important; } 
+      a, a:visited { text-decoration: underline; }
+      a[href]:after { content: " (" attr(href) ")"; }
+      abbr[title]:after { content: " (" attr(title) ")"; }
+      .ir a:after, a[href^="javascript:"]:after, a[href^="#"]:after { content: ""; } 
+      pre, blockquote { border: 1px solid #999; page-break-inside: avoid; }
+      thead { display: table-header-group; }
+      tr, img { page-break-inside: avoid; }
+      img { max-width: 100% !important; }
+      @page { margin: 0.5cm; }
+      p, h2, h3 { orphans: 3; widows: 3; }
+      h2, h3 { page-break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>h5bp-script-tags<h1>
+    <h2>jsdom/jquery + build script experiment</h2>
+  </header>
+  <div role="main">
+          <p class="docs"><a href="docs/h5bp-script-tags.html">Moar docs</a></p>
+    <h1>h5bp script tags</h1>
+
+<p>jsdom/jquery + build script experiment.</p>
+
+<p>This repository holds codes and test cases related to <a href="http://github.com/h5bp/html5-boilerplate/issues/#issue/831">h5bp/html5-boilerplate#831</a>.</p>
+
+<p><strong>Status</strong>: Ok for JS/CSS bundles/processor.</p>
+
+<h2>Synopsis</h2>
+
+<pre><code>git clone git://github.com/mklabs/h5bp-build-script-tags.git
+cd h5bp-build-script-tags
+npm install
+npm start</code></pre>
+
+<p>A <code>[[ build js file.js ]]</code> directive is parsed as <code></code>[[ build processor
+path/to/bundle.js ]]`.</p>
+
+<pre><code>   $ npm start
+   npm info it worked if it ends with ok
+   npm info using npm@1.0.27
+   npm info using node@v0.4.12
+   npm info prestart h5bp-script-tags@0.0.1
+   npm info start h5bp-script-tags@0.0.1
+
+   &gt; h5bp-script-tags@0.0.1 start /Users/mk/Temp/dev/mklabs/h5bp-build-script-tags
+   &gt; ./node_modules/.bin/h5bp-cake htmltags
+
+   verbose: start htmltags  »
+   verbose: start mkdirs  »
+   verbose: start clean  »
+   verbose: start intro  »
+   input:  intro »
+   Cool, let&#39;s start..
+   verbose: start check  »
+   input:  clean »  Cleaning up previous build directory...
+   info:   ✔ end:clean
+   input:  mkdirs »  Copying 9 files over to intermediate from .
+   info:   ✔ end:mkdirs
+   input:  htmltags »  Processing bundle: css/site.css with css processor
+   input:  htmltags »  Processing bundle: js/head-scripts.js with head processor
+   input:  htmltags »  Processing bundle: js/libs.js with js processor
+   input:  htmltags »  Processing bundle: js/app.js with js processor
+   input:  htmltags »  Init jquery.fs module
+   data:   {}
+   input:  htmltags »  Start of CSS processor
+   input:  htmltags »  Init jquery.fs module
+   data:   {}
+   input:  htmltags »  Start of JS processor, outputing without defer attribute
+   input:  htmltags »  Init jquery.fs module
+   data:   {}
+   input:  htmltags »  Start of JS processor
+   input:  htmltags »  Concat 1 file
+   input:  htmltags »  Concat file » js/libs/underscore-min.js to /Users/mk/Temp/dev/mklabs/h5bp-build-script-tags/intermediate/foobar/kkkjs/libs.js
+   input:  htmltags »  Concat file » js/libs/backbone-min.js to /Users/mk/Temp/dev/mklabs/h5bp-build-script-tags/intermediate/foobar/kkkjs/libs.js
+   input:  htmltags »  Write concat files to /Users/mk/Temp/dev/mklabs/h5bp-build-script-tags/intermediate/foobar/kkkjs/libs.js
+   input:  htmltags »  Concat/Min 1 file
+   input:  htmltags »  Minify file » js/libs/underscore-min.js
+   input:  htmltags »  Minify file » js/libs/backbone-min.js
+   input:  htmltags »  Write minified files to /Users/mk/Temp/dev/mklabs/h5bp-build-script-tags/intermediate/minified/stuff/with/a/long/path/js/libs.js
+   input:  htmltags »  Init jquery.fs module
+   data:   {}
+   input:  htmltags »  Start of JS processor
+   input:  htmltags »  Concat 1 file
+   input:  htmltags »  Concat file » js/plugins.js to /Users/mk/Temp/dev/mklabs/h5bp-build-script-tags/intermediate/foobar/kkkjs/app.js
+   input:  htmltags »  Concat file » js/script.js to /Users/mk/Temp/dev/mklabs/h5bp-build-script-tags/intermediate/foobar/kkkjs/app.js
+   input:  htmltags »  Write concat files to /Users/mk/Temp/dev/mklabs/h5bp-build-script-tags/intermediate/foobar/kkkjs/app.js
+   input:  htmltags »  Concat/Min 1 file
+   input:  htmltags »  Minify file » js/plugins.js
+   input:  htmltags »  Minify file » js/script.js
+   input:  htmltags »  Write minified files to /Users/mk/Temp/dev/mklabs/h5bp-build-script-tags/intermediate/minified/stuff/with/a/long/path/js/app.js
+   input:  htmltags »  Rev concat css files ok css/site.css 988118e30102986f28cfcdb92eaf97db
+   input:  htmltags »  Processor done, replacing with &lt;link rel=&quot;stylesheet&quot; href=&quot;css/988118e30102986f28cfcdb92eaf97db.site.css&quot;&gt;
+   input:  htmltags »  Processor done, replacing with &lt;script src=&quot;js/873b6da0f0ac40656c83caee9ff03a54.head-scripts.js&quot;&gt;&lt;/script&gt;
+   input:  htmltags »  Processor done, replacing with &lt;script defer src=&quot;js/e0c8abb7a5599a1caf8d00591d7691ff.libs.js&quot;&gt;&lt;/script&gt;
+   input:  htmltags »  Processor done, replacing with &lt;script defer src=&quot;js/2b083070b5f0e6cd43aa8dd41e4401e4.app.js&quot;&gt;&lt;/script&gt;
+   input:  htmltags »  Update /Users/mk/Temp/dev/mklabs/h5bp-build-script-tags/intermediate/index.html with processed assets.
+   info:   ✔ end:htmltags
+   input:  htmltags »  File created » intermediate/foobar/kkkjs/libs.js
+   input:  htmltags »  File created » intermediate/foobar/kkkjs/app.js
+   input:  htmltags »  Minification ok js/app.js
+   input:  htmltags »  Minification ok js/libs.js
+   npm info poststart h5bp-script-tags@0.0.1
+   npm info ok</code></pre>
+
+<h2>Example</h2>
+
+<p>This repo is mainly an example.</p>
+
+<p>...</p>
+
+<h2>Processors</h2>
+
+<p>A processor might be everything. To create a processor, one would create
+a new file in <code>tasks/processors</code>, name it appropriately, and implement
+the processing function. Then it will be available to use in template
+files, with the inine html comments.</p>
+
+<pre><code>    &lt;!-- [[ build processorname output.ext ]] --&gt;
+      ... html markup ...
+    &lt;!-- [[ endbuild ]] --&gt;</code></pre>
+
+<p>Html markup should be semantically valid, so that the html files could
+be used in development. The processors must do their tasks based on the
+html markup, it generally involves the parsing ot link/script tags.</p>
+
+<p>You can checkout the tasks implementation in tasks/, these are the
+plugins files that can interact with the main build script. And the
+tasks/processors are the files inlvoded in handling the html markup,
+they simply return the new html fragment.</p>
+
+<h2>jsdom processors</h2>
+
+<p><em>This is experimental..</em></p>
+
+<p>Here&#39;s the idea:</p>
+
+<p>In the current implementation, processors takes html markup to do their
+task.</p>
+
+<p>This generally involves a lot of regex use. There is a great project
+named <a href="[https://github.com/tmpvar/jsdom](https://github.com/tmpvar/jsdom)">jsdom</a> that would allow us to
+think about a possible jquery usage in processors.</p>
+
+<p>This is just fragment of html markup, so probably processors could use
+jQuery to list whatever tags they want, and just use the jQuery syntax
+to get the list of assets to process.</p>
+
+<p>Then, we could probably extend the jQuery prototype and provides a few
+helper methods to:</p>
+
+<ul><li>easily do file concatenations</li><li>minification</li><li>revving of concataned scripts (probably before the min, saving the
+costly minification process when filename changes)</li><li>write the resulting scripts, in the right place to comply with the
+overall build script.</li></ul>
+
+<p>Here is <a href="[https://github.com/mklabs/h5bp-build-script-tags/blob/master/tasks/processors/plugins/jquery.fs.js](https://github.com/mklabs/h5bp-build-script-tags/blob/master/tasks/processors/plugins/jquery.fs.js)">a
+start</a>
+at some jQuery plugin helpers, wrapping up the node api in jQuery
+methods then available to use in processors.</p>
+
+<h2>Examples</h2>
+
+<h3>css</h3>
+
+<pre><code>   var path = require(&#39;path&#39;);
+
+   module.exports = function($, output, html, em, cb) {
+     // this === em
+     this.emit(&#39;log&#39;, &#39;Start of CSS processor&#39;);
+
+     $(&#39;link[href]&#39;).md5(&#39;intermediate/&#39; + output, function(err, hash, file) {
+       if(err) return em.emit(&#39;error&#39;, err);
+       var href = output.split(&#39;/&#39;).slice(0, -1).concat(hash + &#39;.&#39; + path.basename(output)).join(&#39;/&#39;);
+
+       em.emit(&#39;log&#39;, &#39;Rev concat css files ok &#39; + output + &#39; &#39; + hash);
+
+       // clarfiy wheter callback/emitter is confusing, or just opt to use
+       // the emitter, with a special replace event or something (not end,
+       // already has semantic in build script)
+       return cb(null, html, &#39;&lt;link rel=&quot;stylesheet href=&quot;&#39; + href + &#39;&quot;&gt;&#39;);
+     });
+   };</code></pre>
+
+<h3>js</h3>
+
+<pre><code>   var path = require(&#39;path&#39;);
+
+   module.exports = function($, output, html, em, cb) {
+     // this === em
+     this.emit(&#39;log&#39;, &#39;Start of JS processor&#39;);
+
+     // concat and minify here just for testing, the real use case is md5 and where
+     // the callback call happen
+     var scripts = $(&#39;script[src]&#39;).concat(&#39;intermediate/foobar/kkk&#39; + output, function(err) {
+       if(err) return em.emit(&#39;error&#39;, err);
+       em.emit(&#39;log&#39;, &#39;File created » intermediate/foobar/kkk&#39; + output);
+     });
+
+     // todo: handle dir/file arguments. When dir, should create with default name.
+     scripts.minify(&#39;intermediate/minified/stuff/with/a/long/path/&#39; + output, function(err) {
+       if(err) return em.emit(&#39;error&#39;, err);
+       em.emit(&#39;log&#39;, &#39;Minification ok &#39; + output);
+     });
+
+     $(&#39;script[src]&#39;).md5(&#39;./intermediate/&#39; + output, function(err, hash) {
+       if(err) return em.emit(&#39;error&#39;, err);
+       var href = output.split(&#39;/&#39;).slice(0, -1).concat(hash + &#39;.&#39; + path.basename(output)).join(&#39;/&#39;);
+       return cb(null, html, &#39;&lt;script defer src=&quot;&#39; + href + &#39;&quot;&gt;&lt;/script&gt;&#39;);
+     });
+   };</code></pre>
+
+<h3>index.html</h3>
+
+<p>Before:</p>
+
+<pre><code>   &lt;!doctype html&gt;
+   &lt;!--[if lt IE 7]&gt; &lt;html class=&quot;no-js ie6 oldie&quot; lang=&quot;en&quot;&gt; &lt;![endif]--&gt;
+   &lt;!--[if IE 7]&gt;    &lt;html class=&quot;no-js ie7 oldie&quot; lang=&quot;en&quot;&gt; &lt;![endif]--&gt;
+   &lt;!--[if IE 8]&gt;    &lt;html class=&quot;no-js ie8 oldie&quot; lang=&quot;en&quot;&gt; &lt;![endif]--&gt;
+   &lt;!--[if gt IE 8]&gt;&lt;!--&gt; &lt;html class=&quot;no-js&quot; lang=&quot;en&quot;&gt; &lt;!--&lt;![endif]--&gt;
+   &lt;head&gt;
+     &lt;meta charset=&quot;utf-8&quot;&gt;
+     &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge,chrome=1&quot;&gt;
+
+     &lt;title&gt;&lt;/title&gt;
+     &lt;meta name=&quot;description&quot; content=&quot;&quot;&gt;
+     &lt;meta name=&quot;author&quot; content=&quot;&quot;&gt;
+
+     &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;
+
+     &lt;!-- [[ build css css/site.css ]] --&gt;
+     &lt;link rel=&quot;stylesheet&quot; href=&quot;css/style.css&quot;&gt;
+     &lt;!-- [[ endbuild ]] --&gt;
+
+     &lt;!-- [[ build js js/head-scripts.js ]] --&gt;
+     &lt;script src=&quot;js/libs/modernizr-2.0.6.min.js&quot;&gt;&lt;/script&gt;
+     &lt;!-- [[ endbuild ]] --&gt;
+   &lt;/head&gt;
+
+   &lt;body&gt;
+
+     &lt;div id=&quot;container&quot;&gt;
+       &lt;header&gt;
+
+       &lt;/header&gt;
+       &lt;div id=&quot;main&quot; role=&quot;main&quot;&gt;
+
+       &lt;/div&gt;
+       &lt;footer&gt;
+
+       &lt;/footer&gt;
+     &lt;/div&gt; &lt;!--! end of #container --&gt;
+
+
+     &lt;script src=&quot;//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js&quot;&gt;&lt;/script&gt;
+     &lt;script&gt;window.jQuery || document.write(&#39;&lt;script src=&quot;js/libs/jquery-1.6.2.min.js&quot;&gt;&lt;\/script&gt;&#39;)&lt;/script&gt;
+
+     &lt;!-- [[ build js js/libs.js ]] --&gt;
+     &lt;script defer src=&quot;js/libs/underscore-min.js&quot;&gt;&lt;/script&gt;
+     &lt;script defer src=&quot;js/libs/backbone-min.js&quot;&gt;&lt;/script&gt;
+     &lt;!-- [[ endbuild ]] --&gt;
+
+     &lt;!-- [[ build js js/app.js ]] --&gt;
+     &lt;script defer src=&quot;js/plugins.js&quot;&gt;&lt;/script&gt;
+     &lt;script defer src=&quot;js/script.js&quot;&gt;&lt;/script&gt;
+
+     &lt;script&gt; // Change UA-XXXXX-X to be your site&#39;s ID
+       window._gaq = [[&#39;_setAccount&#39;,&#39;UAXXXXXXXX1&#39;],[&#39;_trackPageview&#39;],[&#39;_trackPageLoadTime&#39;]];
+       Modernizr.load({
+         load: (&#39;https:&#39; == location.protocol ? &#39;//ssl&#39; : &#39;//www&#39;) + &#39;.google-analytics.com/ga.js&#39;
+       });
+     &lt;/script&gt;
+     &lt;!-- [[ endbuild ]] --&gt;
+
+     &lt;!--[if lt IE 7 ]&gt;
+       &lt;script src=&quot;//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js&quot;&gt;&lt;/script&gt;
+       &lt;script&gt;window.attachEvent(&#39;onload&#39;,function(){CFInstall.check({mode:&#39;overlay&#39;})})&lt;/script&gt;
+     &lt;![endif]--&gt;
+
+   &lt;/body&gt;
+   &lt;/html&gt;</code></pre>
+
+<p>After the <code>htmltags</code> task:</p>
+
+<pre><code>   &lt;!doctype html&gt;
+   &lt;!--[if lt IE 7]&gt; &lt;html class=&quot;no-js ie6 oldie&quot; lang=&quot;en&quot;&gt; &lt;![endif]--&gt;
+   &lt;!--[if IE 7]&gt;    &lt;html class=&quot;no-js ie7 oldie&quot; lang=&quot;en&quot;&gt; &lt;![endif]--&gt;
+   &lt;!--[if IE 8]&gt;    &lt;html class=&quot;no-js ie8 oldie&quot; lang=&quot;en&quot;&gt; &lt;![endif]--&gt;
+   &lt;!--[if gt IE 8]&gt;&lt;!--&gt; &lt;html class=&quot;no-js&quot; lang=&quot;en&quot;&gt; &lt;!--&lt;![endif]--&gt;
+   &lt;head&gt;
+     &lt;meta charset=&quot;utf-8&quot;&gt;
+     &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge,chrome=1&quot;&gt;
+
+     &lt;title&gt;&lt;/title&gt;
+     &lt;meta name=&quot;description&quot; content=&quot;&quot;&gt;
+     &lt;meta name=&quot;author&quot; content=&quot;&quot;&gt;
+
+     &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;
+
+   &lt;link rel=&quot;stylesheet&quot; href=&quot;css/988118e30102986f28cfcdb92eaf97db.site.css&quot;&gt;
+
+   &lt;script src=&quot;js/873b6da0f0ac40656c83caee9ff03a54.head-scripts.js&quot;&gt;&lt;/script&gt;
+   &lt;/head&gt;
+
+   &lt;body&gt;
+
+     &lt;div id=&quot;container&quot;&gt;
+       &lt;header&gt;
+
+       &lt;/header&gt;
+       &lt;div id=&quot;main&quot; role=&quot;main&quot;&gt;
+
+       &lt;/div&gt;
+       &lt;footer&gt;
+
+       &lt;/footer&gt;
+     &lt;/div&gt; &lt;!--! end of #container --&gt;
+
+
+     &lt;script src=&quot;//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js&quot;&gt;&lt;/script&gt;
+     &lt;script&gt;window.jQuery || document.write(&#39;&lt;script src=&quot;js/libs/jquery-1.6.2.min.js&quot;&gt;&lt;\/script&gt;&#39;)&lt;/script&gt;
+
+   &lt;script defer src=&quot;js/e0c8abb7a5599a1caf8d00591d7691ff.libs.js&quot;&gt;&lt;/script&gt;
+
+   &lt;script defer src=&quot;js/d636120810e8c16e2229900bd71458f7.app.js&quot;&gt;&lt;/script&gt;
+
+     &lt;!--[if lt IE 7 ]&gt;
+       &lt;script src=&quot;//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js&quot;&gt;&lt;/script&gt;
+       &lt;script&gt;window.attachEvent(&#39;onload&#39;,function(){CFInstall.check({mode:&#39;overlay&#39;})})&lt;/script&gt;
+     &lt;![endif]--&gt;
+
+   &lt;/body&gt;
+   &lt;/html&gt;</code></pre>
+
+<h2>Generated files</h2>
+
+<p>are in <code>intermediate/</code> folder.</p>
+  </div>
+</body>
+</html>
