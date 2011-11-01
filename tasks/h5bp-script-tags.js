@@ -8,11 +8,11 @@ var path = require('path'),
   plugins = require('./processors/plugins/jquery.fs');
 
 // https://github.com/h5bp/html5-boilerplate/issues/831
-
 var regbuild = /^\s*<!--\s*\[\[\s*build\s(\w+)\s([\w\d\.\-_\/]+)\s*\]\]\s*-->/,
   regend = /\s*<!--\s*\[\[\s*endbuild\s*\]\]\s*-->/;
 
-// Load processors
+// Load processors, these are autoloaded from `./processors/*.js`, the filename is
+// used as processors hash key.
 var processors = {};
 fs.readdirSync(path.join(__dirname, 'processors')).forEach(function(file) {
   var filepath = path.resolve(__dirname, 'processors', file),
@@ -24,19 +24,24 @@ fs.readdirSync(path.join(__dirname, 'processors')).forEach(function(file) {
 });
 
 
-return console.log(processors);
-
-
+// ## intro
+// Overrides the intro task of the overall build script
 task('intro', 'bla bla bla', function(options, em) {
-
   var intro = [
     '',
     "Cool, let's start..",
   ].join('\n');
 
   em.emit('log', intro);
+  em.emit('end');
 });
 
+
+// ## htmtags
+// Create a new cake task. Relies on mkdirs task, and iterate through any files
+// described in `file.pages.default.include` configuration property (defaulting
+// to `index.html` and `404.html` files).
+//
 task('htmltags', 'Process html files', function(options, em) {
   invoke('mkdirs');
   gem.on('end:mkdirs', function() {
@@ -45,7 +50,6 @@ task('htmltags', 'Process html files', function(options, em) {
         return path.resolve(source, f);
       });
 
-    console.log(files);
     async.forEach(files, processFile(em), function(err) {
       if(err) return em.emit('error', err);
       em.emit('log', 'Good to gooo');
@@ -69,6 +73,7 @@ task('htmltags', 'Process html files', function(options, em) {
 //
 // The processor might have change the dom tree. The content of
 // `window.document.innerHTML` is then used to replace the original file.
+//
 function processFile(em) { return function (file, cb) {
 
 
