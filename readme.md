@@ -2,9 +2,7 @@
 
 jsdom/jquery + build script experiment.
 
-This repository holds codes and test cases related to
-
-* https://github.com/h5bp/html5-boilerplate/issues/831
+This repository holds codes and test cases related to h5bp/html5-boilerplate#831.
 
 **Status**: Ok for JS/CSS bundles/processor.
 
