@@ -23,6 +23,10 @@ fs.readdirSync(path.join(__dirname, 'processors')).forEach(function(file) {
   processors[filename] = require(filepath);
 });
 
+
+return console.log(processors);
+
+
 task('intro', 'bla bla bla', function(options, em) {
 
   var intro = [
@@ -55,7 +59,16 @@ task('htmltags', 'Process html files', function(options, em) {
 
 
 // ## Helpers
-
+//
+// The process file function is the asyns.forEach iterator function.  It tries
+// to read the file content from the file system, and bootstrap a jsdom
+// environement for each of these. The `document` processor is then called
+// given an extended version of jQuery (with few fs plugin helper: concat,
+// minify, rev, md5), the instance of the task EventEmitter, and a callback to
+// call when the processor is done.
+//
+// The processor might have change the dom tree. The content of
+// `window.document.innerHTML` is then used to replace the original file.
 function processFile(em) { return function (file, cb) {
 
 
@@ -82,53 +95,12 @@ function processFile(em) { return function (file, cb) {
       }
     });
   });
-
-
-    // todo: working with a single file, since this is wrapped
-    // in a forEach files, the end event will be triggered for each
-    // one
-    var next = function(err, html, replacement) {
-      if(err) return em.emit('error', err);
-
-      em.emit('log', 'Processor done, replacing with ' + replacement);
-      body = body.replace(html, replacement);
-      if(--ln) return;
-
-      em.emit('log', 'Update ' + file + ' with processed assets.');
-      // Write the new body on latest execustion call
-      fs.writeFileSync(file, body, 'utf8');
-      em.emit('end');
-    };
-
-
-  bundles.forEach(function(bundle) {
-    var parts = bundle.split(':'),
-      processor = processors[parts[0]],
-      content = sections[bundle].join('\n');
-
-    em.emit('log', 'Processing bundle: ' + parts[1] + ' with ' + parts[0] + ' processor ');
-
-    // Processors are the files in processors/, a [[ build processor filename.ext ]] directive
-    // directly drives which processors handle the replacement.
-    if(!processor) return em.emit('error', new Error('Unkown processor: ' + parts[0]));
-
-    // bootstrap a jsdom env for each files, done in // for now
-    // may ends up doing it sequentially if needed
-    jsdom.env({
-      html: content,
-      src: [jquery],
-      done: function(err, window) {
-        if(err) return em.emit('error', err);
-        var $ = extend(window.$, em, plugins);
-        // todo: clarify params here, processors should probably don't know
-        // which html fragment is replaced.
-        processor.call(em, $, parts[1], content, em, next);
-      }
-    });
-  });
-
 }}
 
+// ### extend
+// Extend the given jQuery object prototype with few helper
+// functions. They're in `processors/plugins/jquery.fs`. The module
+// is called given references to $ and the build script event emitter.
 function extend($, em, pmodule) {
   $.extend($.fn, pmodule($, em));
   return $;
