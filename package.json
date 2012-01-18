@@ -1,15 +1,18 @@
 {
   "name": "h5bp-script-tags",
   "description": "jsdom/jquery + build script experiment",
-  "version": "0.0.1",
+  "version": "0.0.2",
+
+  "main": "./tasks/h5bp-script-tags",
+
   "dependencies": {
-    "mkdirp": "0.0.7",
-    "uglify-js": "~1.1.1",
-    "jsdom": "~0.2.8",
-    "cakes": "https://github.com/mklabs/cakes/tarball/master",
-    "async": "~0.1.14"
+    "mkdirp": "~0.2.2",
+    "async": "~0.1.15",
+    "uglify-js": "~1.2.5",
+    "jsdom": "~0.2.10"
   },
+
   "scripts": {
-    "start": "./node_modules/.bin/h5bp-cake htmltags"
+    "start": "node tests/test.js"
   }
 }

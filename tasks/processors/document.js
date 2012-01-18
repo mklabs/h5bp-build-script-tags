@@ -10,11 +10,11 @@ fs = require('fs');
 // original file.
 //
 
-module.exports = function($, output, html, em, cb) {
+module.exports = function($, cb) {
   // this === em
-  this.emit('log', 'Start of document processor, getting the whole document and messing with it');
+  console.log('Start of document processor, getting the whole document and messing with it');
 
-  this.emit('Loking for any tags with data-build attributes...');
+  console.log('Loking for any tags with data-build attributes...');
 
   var tags = $('[data-build]');
   console.log('tags: ', tags.length);
@@ -42,13 +42,14 @@ module.exports = function($, output, html, em, cb) {
 
   // for each different bundle target
   var ln = Object.keys(bundles).length;
+
   Object.keys(bundles).forEach(function(bundle) {
     console.log('Processing bundle ', bundle);
 
     $('head link[data-build="' + bundle + '"]').md5('intermediate/' + bundle, function(err, hash, file) {
-      if(err) return em.emit('error', err);
+      if(err) return cb(err);
 
-      em.emit('log', file + ' generated.');
+      console.log(file + ' generated.');
 
       var tags = $('head').find('link[data-build="' + bundle + '"]'),
         last = tags.slice(-1);
@@ -99,9 +100,9 @@ module.exports = function($, output, html, em, cb) {
     tags
       .filter(function(){ return this.src; })
       .md5('intermediate/' + bundle, function(err, hash, file) {
-        if(err) return em.emit('error', err);
+        if(err) return cb(err);
 
-        em.emit('log', file + ' generated.');
+        console.log(file + ' generated.');
 
         var last = tags.slice(-1);
 
@@ -120,9 +121,6 @@ module.exports = function($, output, html, em, cb) {
         next();
       });
   });
-
-
-
 
   function next() {
     if(!links || !scripts) return;

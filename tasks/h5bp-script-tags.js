@@ -24,42 +24,43 @@ fs.readdirSync(path.join(__dirname, 'processors')).forEach(function(file) {
 });
 
 
-// ## intro
-// Overrides the intro task of the overall build script
-task('intro', 'bla bla bla', function(options, em) {
-  var intro = [
-    '',
-    "Cool, let's start..",
-  ].join('\n');
-
-  em.emit('log', intro);
-  em.emit('end');
-});
-
-
-// ## htmtags
-// Create a new cake task. Relies on mkdirs task, and iterate through any files
-// described in `file.pages.default.include` configuration property (defaulting
-// to `index.html` and `404.html` files).
+// ## dombuild
 //
-task('htmltags', 'Process html files', function(options, em) {
-  invoke('mkdirs');
-  gem.on('end:mkdirs', function() {
-    var source = path.join(__dirname, '..', dir.intermediate),
-      files = file.pages.default.include.split(', ').map(function(f) {
-        return path.resolve(source, f);
-      });
+// Iterates through each files and execute the dombuild on top of its content.
+//
+//    dombuild(files, [config, ] callback);
+//
+// The `files` parameter is an array of strings. Each element in the array is
+// the name of the file to process. Gets resolved against cwd.
+//
+// The optional `options` parameter is an object hash of build config parameters.
+//
+// * `dirname`: defaults to `cwd`, to which path files get resolved.
+//
+// Finally, `callback` is a function that will be called when all files have been processed,
+// or when an arror has been encoutered.
+//
 
-    async.forEach(files, processFile(em), function(err) {
-      if(err) return em.emit('error', err);
-      em.emit('log', 'Good to gooo');
-      em.emit('data', arguments);
+var dombuild = module.exports = function dombuild(files, options, cb) {
 
-      em.emit('end');
-    });
+  if(!cb) {
+    cb = options;
+    options = {};
+  }
 
+  options.dirname = options.dirname || process.cwd();
+
+  var files = files.map(function(f) {
+    return path.resolve(options.dirname, f);
   });
-});
+
+  async.forEach(files, processFile, function(err) {
+    if(err) return cb(err);
+    console.log('Process done');
+    cb();
+  });
+
+};
 
 
 // ## Helpers
@@ -68,16 +69,14 @@ task('htmltags', 'Process html files', function(options, em) {
 // to read the file content from the file system, and bootstrap a jsdom
 // environement for each of these. The `document` processor is then called
 // given an extended version of jQuery (with few fs plugin helper: concat,
-// minify, rev, md5), the instance of the task EventEmitter, and a callback to
-// call when the processor is done.
+// minify, rev, md5).
 //
 // The processor might have change the dom tree. The content of
 // `window.document.innerHTML` is then used to replace the original file.
 //
-function processFile(em) { return function (file, cb) {
+function processFile(file, cb) {
 
-
-  return fs.readFile(file, 'utf8', function(err, body) {
+  fs.readFile(file, 'utf8', function(err, body) {
     if(err) return cb(err);
 
     // bootstrap a jsdom env for each files, done in // for now
@@ -86,27 +85,30 @@ function processFile(em) { return function (file, cb) {
       html: body,
       src: [jquery],
       done: function(err, window) {
-        if(err) return em.emit('error', err);
-        var $ = extend(window.$, em, plugins);
+        if(err) return cb(err);
+        var $ = attachPlugins(window.$);
         // todo: clarify params here, processors should probably don't know
         // which html fragment is replaced.
 
-        processors.document.call(em, $, file, body, em, function(err) {
-          if(err) return em.emit('error', err);
+        processors.document($, function(err) {
+          if(err) return cb(err);
           // Write the new content, and keep the doctype safe (innerHTML
           // string doesnt include it).
+
+          console.log('Processing of', file, 'done.');
           fs.writeFile(file, '<!doctype html>' + window.document.innerHTML, cb);
         });
       }
     });
   });
-}}
 
-// ### extend
+}
+
+// ### attachPlugins
 // Extend the given jQuery object prototype with few helper
 // functions. They're in `processors/plugins/jquery.fs`. The module
 // is called given references to $ and the build script event emitter.
-function extend($, em, pmodule) {
-  $.extend($.fn, pmodule($, em));
+function attachPlugins($) {
+  $.extend($.fn, plugins);
   return $;
 }
