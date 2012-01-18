@@ -18,7 +18,7 @@ var cmds = [
 
 exec(cmds, { cwd: path.join(__dirname, '..') }, function(err) {
   assert.ifError(err);
-  console.log('Interlediate done');
+  console.log('Intermediate done');
 
   dombuild(['index.html', '404.html'], { dirname: path.join(__dirname, '../intermediate') }, function(err) {
     assert.ifError(err);

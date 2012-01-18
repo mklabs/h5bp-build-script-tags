@@ -3,7 +3,7 @@
   "description": "jsdom/jquery + build script experiment",
   "version": "0.0.2",
 
-  "main": "./tasks/h5bp-script-tags",
+  "main": "./lib/dombuild",
 
   "dependencies": {
     "mkdirp": "~0.2.2",
