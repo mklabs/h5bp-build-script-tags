@@ -2,16 +2,16 @@
   "name": "h5bp-script-tags",
   "description": "jsdom/jquery + build script experiment",
   "version": "0.0.2",
-
   "main": "./lib/dombuild",
-
   "dependencies": {
     "mkdirp": "~0.2.2",
     "async": "~0.1.15",
     "uglify-js": "~1.2.5",
-    "jsdom": "~0.2.10"
+    "cheerio": "~0.4.2",
+    "rimraf": "~1.0.9",
+    "ncp": "~0.2.3",
+    "clean-css": "~0.3.2"
   },
-
   "scripts": {
     "start": "node tests/test.js"
   }
